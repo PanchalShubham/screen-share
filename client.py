@@ -2,7 +2,6 @@
 import socket
 import threading
 from util import display_screen
-from copy import deepcopy
 
 # Implements the utilities for the client
 class Client:
@@ -104,27 +103,27 @@ class Client:
         self.__socket.close()
 
 
-host='127.0.0.1'
-server_ip='127.0.0.1'
-server_port=4000
 
-# host='192.168.137.1'
-# server_ip='192.168.137.246'
+
+# host='127.0.0.1'
+# server_ip='127.0.0.1'
 # server_port=4000
 
-client = Client(host)
-if(client.connect(server_ip, server_port)):
-    if(client.handshake()):
-        client.capture_server_screen()
-        user_inp = ''
-        while user_inp != 'quit':
-            user_inp = input('>> ')
-            print(user_inp)
-            if (user_inp == 'stop capture'):
-                client.stop_capturing_server_screen()
-            elif (user_inp == 'exit'):
-                client.stop_capturing_server_screen()
-                break
-        client.disconnect()
+# # host='192.168.137.1'
+# # server_ip='192.168.137.246'
+# # server_port=4000
 
-
+# client = Client(host)
+# if(client.connect(server_ip, server_port)):
+#     if(client.handshake()):
+#         client.capture_server_screen()
+#         user_inp = ''
+#         while user_inp != 'quit':
+#             user_inp = input('>> ')
+#             print(user_inp)
+#             if (user_inp == 'stop capture'):
+#                 client.stop_capturing_server_screen()
+#             elif (user_inp == 'exit'):
+#                 client.stop_capturing_server_screen()
+#                 break
+#         client.disconnect()

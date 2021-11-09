@@ -1,6 +1,7 @@
 # imports
 import socket
-import time
+import sys
+from util import frameToString, get_frame
 
 # Implements the utilities for the server
 class Server:
@@ -41,8 +42,13 @@ class Server:
     def __client(self, data, addr):
         print('client addr={} sent data={}'.format(addr, data.decode('utf-8')))
         while True:
-            self.__socket.sendto('Hello client'.encode('utf-8'), addr)
-            time.sleep(2)
+            # capture a frame
+            frame = get_frame()
+            # encode the frame
+            frame_bytes:bytes = frameToString(frame)
+            print(sys.getsizeof(frame_bytes))
+            # send the encoded data to client
+            self.__socket.sendto(frame_bytes, addr)
          
          
     # runs the server and wait for the connection
@@ -54,10 +60,3 @@ class Server:
             # process the client
             self.__client(data, addr)
             
-   
-# creat
-server = Server()
-# process if server is connected
-if(server.connect()):
-    server.run()
-

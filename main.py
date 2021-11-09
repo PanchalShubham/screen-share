@@ -1,45 +1,70 @@
-# importing the required packages
-import pyautogui
-import cv2
-import numpy as np
+# imports
+import argparse
+from server import Server
+from client import Client
 
-# Specify resolution
-resolution = (1920, 1080)
 
-# Specify video codec
-codec = cv2.VideoWriter_fourcc(*"XVID")
+# argument parser
+parser = argparse.ArgumentParser()
+parser.add_argument('--server', action='store_true', help='Runs the server')
+parser.add_argument('--client', action='store_true', help='Runs the client')
+parser.add_argument('--server_host', type=str, default='')
+parser.add_argument('--client_host', type=str, default='127.0.0.1')
+parser.add_argument('--server_ip', type=str, default='127.0.0.1')
+parser.add_argument('--server_port', type=int, default=4000)
+parser.add_argument('--client_port', type=int, default=4040)
 
-# Specify frames rate. We can choose any
-# value and experiment with it
-fps = 60.0
+# parse the arguments
+args = parser.parse_args()
 
-# Create an Empty window
-cv2.namedWindow("Live", cv2.WINDOW_NORMAL)
 
-# Resize this window
-cv2.resizeWindow("Live", 480, 270)
+# runs the server mode
+def run_server():
+    global args
+    # create server instance
+    server = Server(host=args.server_host, port=args.server_port)
+    # connect the server and run
+    if(server.connect()):
+        server.run()
+    
 
-# capture screen
-while True:
-	# Take screenshot using PyAutoGUI
-	img = pyautogui.screenshot()
+# runs the client mode
+def run_client():
+	global args
+    # create the client
+	client = Client(host=args.client_host, port=args.client_port)
+    # connect to the server
+	if(client.connect(server_ip=args.server_ip, server_port=args.server_port)):
+		if(client.handshake()):
+			client.capture_server_screen()
+			user_inp = ''
+			while user_inp != 'quit':
+				user_inp = input('>> ')
+				print(user_inp)
+				if (user_inp == 'stop capture'):
+					client.stop_capturing_server_screen()
+				elif (user_inp == 'exit'):
+					client.stop_capturing_server_screen()
+				break
+			client.disconnect()
 
-	# Convert the screenshot to a numpy array
-	frame = np.array(img)
 
-	# Convert it from BGR(Blue, Green, Red) to
-	# RGB(Red, Green, Blue)
-	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-	# Optional: Display the recording screen
-	cv2.imshow('Live', frame)
-	
-	# Stop recording when we press 'q'
-	if cv2.waitKey(1) == ord('q'):
-		break
 
-# Release the Video writer
-# out.release()
 
-# Destroy all windows
-cv2.destroyAllWindows()
+# invoke the functionality
+if __name__ == '__main__':    
+	# check the mode
+	if args.server:
+		# run in server mode
+		print('Running server mode...')
+		run_server()
+	elif args.client:
+		# run in client mode
+		print('Running client mode...')
+		run_client()
+	else:
+		# run in server mode
+		print('No mode specified. Proceeding with default configurations.')
+		print('Running server mode...')
+		run_server()
