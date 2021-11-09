@@ -1,5 +1,6 @@
 # imports
 import socket
+import time
 
 # Implements the utilities for the server
 class Server:
@@ -39,7 +40,9 @@ class Server:
     # send details to the client
     def __client(self, data, addr):
         print('client addr={} sent data={}'.format(addr, data.decode('utf-8')))
-        self.__socket.sendto('Hello client'.encode('utf-8'), addr)
+        while True:
+            self.__socket.sendto('Hello client'.encode('utf-8'), addr)
+            time.sleep(2)
          
          
     # runs the server and wait for the connection
