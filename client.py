@@ -43,7 +43,7 @@ class Client:
 
 
     # sends key to the server and validate
-    def validate_key_and_capture(self, key:str):
+    def validate_key_and_capture(self, key:str, title:str):
         # send the key to the server
         self.__socket.sendto(key.encode('utf-8'), self.__server)
         # wait for the server to respond
@@ -61,8 +61,10 @@ class Client:
             exit(0)
         # connection to server succeeded
         print('Connected to server successfully.')
+        # decide the title
+        title = str(self.__server) if title == '' else title
         # start capturing screen
-        self.__capture_server_screen()
+        self.__capture_server_screen(title)
 
     # disconnects the communication 
     def disconnect(self):
@@ -72,9 +74,9 @@ class Client:
         
         
     # captures the screen of the client
-    def __capture_server_screen(self):
+    def __capture_server_screen(self, title):
         # create a new thread to capture screen
-        thread = threading.Thread(target=display_screen, args=(self.__socket, str(self.__server)))
+        thread = threading.Thread(target=display_screen, args=(self.__socket, title))
         # kill the thread when process terminates
         thread.setDaemon(True)
         # start the thread

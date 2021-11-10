@@ -15,6 +15,7 @@ parser.add_argument('--server_ip', type=str, default='127.0.0.1', help='IP addre
 parser.add_argument('--server_port', type=int, default=4000, help='Port at which server is running')
 parser.add_argument('--client_port', type=int, default=4040, help='Port at which client is running')
 parser.add_argument('--public', action='store_true', help='Allow access to your server without key')
+parser.add_argument('--title', type=str, default='screen-share', help='The title of the window')
 
 # parse the arguments
 args = parser.parse_args()
@@ -37,9 +38,12 @@ def run_client():
 	client = Client(host=args.client_host, port=args.client_port)
 	# connect to the server
 	if(client.connect(server_ip=args.server_ip, server_port=args.server_port)):
+		# get the key from the user
 		user_key = input_key()
+		# get the window title
+		title = args.title
 		# validate the key with the server
-		client.validate_key_and_capture(key=user_key)
+		client.validate_key_and_capture(key=user_key, title=title)
 
 
 

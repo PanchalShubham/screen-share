@@ -122,7 +122,7 @@ def display_screen(socket, window:str):
             try:
                 # try to parse the image
                 cv2.imshow(window, parse_frame(img))
-                if (cv2.waitKey(1) == ord('q')):
+                if (cv2.waitKey(0) == 27):
                     # terminate the process
                     display = False
             except Exception as e:
