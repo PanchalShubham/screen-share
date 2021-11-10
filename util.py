@@ -28,25 +28,6 @@ def decode(data):
     try:        return data.decode('utf-8')
     except:     return data
 
-# Specify resolution
-resolution = (1920, 1080)
-
-# Specify video codec
-codec = cv2.VideoWriter_fourcc(*"XVID")
-
-# Specify frames rate. We can choose any
-# value and experiment with it
-fps = 60.0
-
-# # Create an Empty window
-# cv2.namedWindow("Live", cv2.WINDOW_NORMAL)
-
-# # Resize this window
-# cv2.resizeWindow("Live", 480, 270)
-
-
-
-
 
 # captures a screenshot and returns the frame
 def get_frame():
@@ -98,9 +79,8 @@ def share_screen(socket, addr):
         data:bytes = frameToString(frame)
         # data will be sent in chunks
         numOfBytes = sys.getsizeof(data)
+        # construct chunks
         chunks = [data[i:i+CHUNK_SIZE] for i in range(0, numOfBytes, CHUNK_SIZE)]
-        # print(chunks)
-        print(len(chunks))
         # send the start to the client
         socket.sendto('FRAME START'.encode('utf-8'), addr)
         # send chunks to the client
