@@ -74,7 +74,7 @@ class Client:
     # captures the screen of the client
     def __capture_server_screen(self):
         # create a new thread to capture screen
-        thread = threading.Thread(target=display_screen, args=(self.__socket,))
+        thread = threading.Thread(target=display_screen, args=(self.__socket, str(self.__server)))
         # kill the thread when process terminates
         thread.setDaemon(True)
         # start the thread

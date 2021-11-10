@@ -4,11 +4,12 @@ import cv2
 import numpy as np
 from io import BytesIO
 import sys
-import zlib
 import secrets
 import string
 import time
 
+# define the size of the chunk
+CHUNK_SIZE = 4096
 
 # generates a random key of given length
 def random_key(length:int):
@@ -20,6 +21,12 @@ def input_key():
     key = input('Enter key: ')
     return key
 
+
+# decodes the given data
+def decode(data):
+    # try to decode the data
+    try:        return data.decode('utf-8')
+    except:     return data
 
 # Specify resolution
 resolution = (1920, 1080)
@@ -39,23 +46,6 @@ fps = 60.0
 
 
 
-# shares the screen to the user
-def share_screen(socket, addr):
-    # send data to client indefinitely
-    while True:
-        # send the data to the client
-        socket.sendto('hello world'.encode('utf-8'), addr)
-        time.sleep(2)
-
-    
-# displays the screen to user
-def display_screen(socket):
-    # receive data from server indefinitely
-    while True:
-        # receive the data from server
-        data_bytes, _ = socket.recvfrom(65535)
-        print(data_bytes)
-
 
 
 # captures a screenshot and returns the frame
@@ -68,8 +58,7 @@ def get_frame():
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     # Convert the screenshot to a numpy array
     frame = np.array(img)
-    #  return the frame
-    print(type(frame))
+    # return the frame
     return frame
 
 # converts the frame to string
@@ -86,8 +75,11 @@ def frameToString(image:np.ndarray):
 # parses the compressed data to numpy `ndarray`
 def parse_frame(image:bytes):
     # load and return the frame
-    return np.load(BytesIO(image))['frame']
-
+    frame = np.load(BytesIO(image))['frame']
+    # Convert it from BGR to RGB
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # return the frame
+    return frame
 
 # displays the frame
 def display_frame(window, frame):
@@ -95,3 +87,66 @@ def display_frame(window, frame):
     image = parse_frame(frame)
     # display the image
     cv2.imshow(window, image)
+
+
+# shares the screen to the user
+def share_screen(socket, addr):
+    # send data to client indefinitely
+    while True:
+        # capture the frame
+        frame = get_frame()
+        data:bytes = frameToString(frame)
+        # data will be sent in chunks
+        numOfBytes = sys.getsizeof(data)
+        chunks = [data[i:i+CHUNK_SIZE] for i in range(0, numOfBytes, CHUNK_SIZE)]
+        # print(chunks)
+        print(len(chunks))
+        # send the start to the client
+        socket.sendto('FRAME START'.encode('utf-8'), addr)
+        # send chunks to the client
+        for chunk in chunks:
+            socket.sendto(chunk, addr)
+        # send the ending message to client
+        socket.sendto('FRAME END'.encode('utf-8'), addr)
+        time.sleep(0.1)
+
+    
+# displays the screen to user
+def display_screen(socket, window:str):
+    # create a named window
+    cv2.namedWindow(window, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(window, 480, 270)
+    # displays the screen
+    display = True
+    # receive data from server indefinitely
+    while display:
+        # receive the data from server
+        data_bytes, _ = socket.recvfrom(CHUNK_SIZE)
+        # decode the data
+        if (decode(data_bytes) == 'FRAME START'):
+            # receive the chunks of the frame
+            chunks = []
+            while True:
+                # get the data
+                chunk, _ = socket.recvfrom(CHUNK_SIZE)
+                # decode the data
+                if decode(chunk) == 'FRAME END':
+                    # received all the thunks from the server
+                    break
+                else:
+                    # add the chunk to list of chunks
+                    chunks.append(chunk)
+            # join chunks to form image
+            img = b''.join(chunks)
+            # display the image
+            try:
+                # try to parse the image
+                cv2.imshow(window, parse_frame(img))
+                if (cv2.waitKey(1) == ord('q')):
+                    # terminate the process
+                    display = False
+            except Exception as e:
+                # do nothing if receieved an invalid data
+                pass
+    # destory all windows
+    cv2.destroyAllWindows()

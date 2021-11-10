@@ -37,9 +37,7 @@ def run_client():
 	client = Client(host=args.client_host, port=args.client_port)
 	# connect to the server
 	if(client.connect(server_ip=args.server_ip, server_port=args.server_port)):
-		# check if server is public
-		print(args.public)
-		user_key = '' if args.public else input_key()
+		user_key = input_key()
 		# validate the key with the server
 		client.validate_key_and_capture(key=user_key)
 
