@@ -1,5 +1,6 @@
 # imports
 import argparse
+from os import error
 from server import Server
 from client import Client
 from util import input_key
@@ -37,23 +38,13 @@ def run_client():
 	global args
 	# create the client
 	client = Client(host=args.client_host, port=args.client_port)
-	# connect to the server
-	if(client.connect(server_ip=args.server_ip, server_port=args.server_port)):
-		# get the key from the user
-		user_key = input_key()
-		# get the window title
-		title = args.title
-		# run the client
-		try:
-			# for successful termination close the client
-			atexit.register(client.disconnect)
-			# validate the key with the server
-			client.validate_key_and_capture(key=user_key, title=title)
-		except:
-			# for any exception disconnect the client
-			client.disconnect()
-
-
+	# attempt to connect with the client
+	try:
+		# connect to the server
+		client.connect(server_ip=args.server_ip, server_port=args.server_port)
+	except:
+		# for any exception disconnect the server
+		client.disconnect()
 
 
 

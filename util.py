@@ -7,6 +7,8 @@ import sys
 import secrets
 import string
 import time
+import json
+import socket
 
 # define the size of the chunk
 CHUNK_SIZE = 4096
@@ -58,79 +60,79 @@ def parse_frame(image:bytes):
     # load and return the frame
     frame = np.load(BytesIO(image))['frame']
     # Convert it from BGR to RGB
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     # return the frame
     return frame
 
-# displays the frame
-def display_frame(window, frame):
-    # parse the frame
-    image = parse_frame(frame)
-    # display the image
-    cv2.imshow(window, image)
-
-
 # shares the screen to the user
-def share_screen(server, addr):
-    # get the socket
-    socket = server.get_socket()
+def share_screen(conn:socket.socket):
     # send data to client indefinitely
-    while server.has_access(addr):
+    while True:
         # capture the frame
         frame = get_frame()
+        # convert the frame to bytes
         data:bytes = frameToString(frame)
-        # data will be sent in chunks
-        numOfBytes = sys.getsizeof(data)
-        # construct chunks
-        chunks = [data[i:i+CHUNK_SIZE] for i in range(0, numOfBytes, CHUNK_SIZE)]
-        # send the start to the client
-        socket.sendto('FRAME START'.encode('utf-8'), addr)
-        # send chunks to the client
-        for chunk in chunks:
-            socket.sendto(chunk, addr)
-        # send the ending message to client
-        socket.sendto('FRAME END'.encode('utf-8'), addr)
-        time.sleep(0.1)
+        # send the frame as to the client
+        conn.send(data)
+        # wait for 0.01s to send the next frame
+        time.sleep(0.01)
 
     
 # displays the screen to user
-def display_screen(socket, window:str):
+def display_screen(socket:socket.socket, window:str):
     # create a named window
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window, 480, 270)
+    # cv2.resizeWindow(window, 480, 270)
     # displays the screen
     display = True
     # receive data from server indefinitely
     while display:
         # receive the data from server
-        data_bytes, addr = socket.recvfrom(CHUNK_SIZE)
-        # decode the data
-        if (decode(data_bytes) == 'FRAME START'):
-            # receive the chunks of the frame
-            chunks = []
-            while True:
-                # get the data
-                chunk, _ = socket.recvfrom(CHUNK_SIZE)
-                # decode the data
-                if decode(chunk) == 'FRAME END':
-                    # received all the thunks from the server
-                    break
-                else:
-                    # add the chunk to list of chunks
-                    chunks.append(chunk)
-            # join chunks to form image
-            img = b''.join(chunks)
-            # display the image
-            try:
-                # try to parse the image
-                cv2.imshow(window, parse_frame(img))
-                if (cv2.waitKey(0) == 27):
-                    # terminate the process
-                    display = False
-                    # send a message to server
-                    socket.sendto('QUIT'.encode('utf-8'), addr)
-            except Exception as e:
-                # do nothing if receieved an invalid data
-                pass
+        data:bytes = socket.recv(CHUNK_SIZE)
+        try:
+            # try to parse the image
+            cv2.imshow(window, parse_frame(data))
+            if (cv2.waitKey(0) == 27):
+                # terminate the process
+                display = False
+        except Exception as e:
+            # do nothing if receieved an invalid data
+            print(e)
+            pass
+        finally:
+            # close the connection once done!
+            socket.close()
+
+        # # decode the data
+        # if (decode(data_bytes) == 'FRAME START'):
+        #     # receive the chunks of the frame
+        #     chunks = []
+        #     while True:
+        #         # get the data
+        #         chunk = socket.recv(CHUNK_SIZE)
+        #         # decode the data
+        #         if decode(chunk) == 'FRAME END':
+        #             # received all the thunks from the server
+        #             break
+        #         else:
+        #             # add the chunk to list of chunks
+        #             chunks.append(chunk)
+        #     # join chunks to form image
+        #     print('received {} chunks'.format(len(chunks)))
+        #     img = b''.join(chunks)
+        #     # display the image
+        #     try:
+        #         # try to parse the image
+        #         cv2.imshow(window, parse_frame(img))
+        #         if (cv2.waitKey(0) == 27):
+        #             # terminate the process
+        #             display = False
+        #     except Exception as e:
+        #         # do nothing if receieved an invalid data
+        #         print(e)
+        #         pass
+        #     finally:
+        #         # close the connection once done!
+        #         socket.close()
     # destory all windows
     cv2.destroyAllWindows()
