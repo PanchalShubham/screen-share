@@ -1,7 +1,7 @@
 # imports
 import socket
 import threading
-from util import display_screen, decode
+from util import display_screen
 
 # Implements the utilities for the client
 class Client:
@@ -70,9 +70,9 @@ class Client:
     # disconnects the communication 
     def disconnect(self):
         # notify the server about the disconnection
+        self.__socket.sendto('QUIT'.encode('utf-8'), self.__server)
         # close the connection to the socket connection
         self.__socket.close()
-        
         
     # captures the screen of the client
     def __capture_server_screen(self, title):

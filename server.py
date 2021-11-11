@@ -89,9 +89,7 @@ class Server:
             # check if it is a quit
             if msg == 'QUIT':
                 # client with address `addr` quit the connection
-                self.__clients.remove(addr)
-                # notify the user
-                print('Client addr={} closed connection.'.format(addr))
+                self.remove_client(addr)
                 # continue to next iteration
                 continue
             # check if the client
@@ -108,4 +106,14 @@ class Server:
                 print('Key matched. Sharing screen with client={}'.format(addr))
                 self.__socket.sendto('OK'.encode('utf-8'), addr)
                 self.__share_screen(addr)
+            
+
+    # removes the client
+    def remove_client(self, addr):
+        # check if client exist
+        if addr in self.__clients:
+            # remove the client from list of clients
+            self.__clients.remove(addr)
+            # notify the user
+            print('Client addr={} closed connection'.format(addr))
             

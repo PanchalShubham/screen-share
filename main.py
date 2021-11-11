@@ -3,6 +3,7 @@ import argparse
 from server import Server
 from client import Client
 from util import input_key
+import atexit
 
 
 # argument parser
@@ -42,8 +43,15 @@ def run_client():
 		user_key = input_key()
 		# get the window title
 		title = args.title
-		# validate the key with the server
-		client.validate_key_and_capture(key=user_key, title=title)
+		# run the client
+		try:
+			# for successful termination close the client
+			atexit.register(client.disconnect)
+			# validate the key with the server
+			client.validate_key_and_capture(key=user_key, title=title)
+		except:
+			# for any exception disconnect the client
+			client.disconnect()
 
 
 
