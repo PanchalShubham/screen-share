@@ -89,7 +89,7 @@ def share_screen(conn:socket.socket):
 def display_screen(socket:socket.socket, window:str):
     # create a named window
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window, 480, 270)
+    # cv2.resizeWindow(window, 480, 270)
     # displays the screen
     display = True
     # receive data from server indefinitely
@@ -105,9 +105,7 @@ def display_screen(socket:socket.socket, window:str):
         # display the image
         try:
             cv2.imshow(window, parse_frame(data))
-            if cv2.waitKey(0) == 27:
-                # terminate the process
-                display = False
+            cv2.waitKey(10)
         except Exception as e:
             # log the error
             print(e)

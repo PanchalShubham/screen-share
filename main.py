@@ -37,7 +37,7 @@ def run_server():
 def run_client():
 	global args
 	# create the client
-	client = Client(host=args.client_host, port=args.client_port)
+	client = Client(host=args.client_host, port=args.client_port, title=args.title)
 	# attempt to connect with the client
 	try:
 		# connect to the server
