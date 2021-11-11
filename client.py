@@ -1,7 +1,7 @@
 # imports
 import socket
 import threading
-from util import display_screen
+from util import display_screen, decode
 
 # Implements the utilities for the client
 class Client:
@@ -18,7 +18,7 @@ class Client:
     def get_socket(self):
         # returns a copy of the socket instance
         return self.__socket
-
+    
     # connects to the server
     def connect(self, server_ip='127.0.0.1', server_port=4000):
         # store properties of server
@@ -51,6 +51,7 @@ class Client:
         data, _ = self.__socket.recvfrom(1024)
         # get server's response
         response = data.decode('utf-8')
+        print(response)
         # check if there was any error
         if response != 'OK':
             # inform the user

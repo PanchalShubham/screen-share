@@ -2,6 +2,7 @@
 import socket
 from util import random_key, share_screen
 import threading
+from util import decode
 
 # Implements the utilities for the server
 class Server:
@@ -14,7 +15,18 @@ class Server:
         self.__socket = None
         self.__key = None
         self.__is_public = is_public
+        # keeps track of the thread running
+        self.__clients = set()
              
+    # getter for socket
+    def get_socket(self):
+        # return the instance of the socket
+        return self.__socket
+    
+    # returns true if the given client has access
+    def has_access(self, addr):
+        # a client has access if it is in client list
+        return addr in self.__clients
 
     # initializes a connection with server
     def connect(self):
@@ -51,8 +63,15 @@ class Server:
     
     # share the screen with this client
     def __share_screen(self, addr):
+        # check if client is already getting access
+        if addr in self.__clients:
+            print('Client addr={} is already connected.'.format(addr))
+            # do not allow multiple connections
+            return
+        # add the client to set of clients
+        self.__clients.add(addr)
         # create a new thread to share screen with this client
-        thread = threading.Thread(target=share_screen, args=(self.__socket, addr))
+        thread = threading.Thread(target=share_screen, args=(self, addr))
         # kill the thread if program terminates
         thread.setDaemon(True)
         # start the thread
@@ -64,10 +83,21 @@ class Server:
         # server runs indefinitely
         while True:
             # get the data from the client
-            data, addr = self.__socket.recvfrom(1024)            
+            data, addr = self.__socket.recvfrom(1024)   
+            # decode the message
+            msg = decode(data)
+            # check if it is a quit
+            if msg == 'QUIT':
+                # client with address `addr` quit the connection
+                self.__clients.remove(addr)
+                # notify the user
+                print('Client addr={} closed connection.'.format(addr))
+                # continue to next iteration
+                continue
+            # check if the client
             # decode the data and verify
             print('Received connection={}. Verifying key...'.format(addr))
-            key = data.decode('utf-8')
+            key = msg
             # check if server is private and key is mismatch
             if key != self.__key and not self.__is_public:
                 # key verification failed so client cannot access

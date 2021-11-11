@@ -71,9 +71,11 @@ def display_frame(window, frame):
 
 
 # shares the screen to the user
-def share_screen(socket, addr):
+def share_screen(server, addr):
+    # get the socket
+    socket = server.get_socket()
     # send data to client indefinitely
-    while True:
+    while server.has_access(addr):
         # capture the frame
         frame = get_frame()
         data:bytes = frameToString(frame)
@@ -101,7 +103,7 @@ def display_screen(socket, window:str):
     # receive data from server indefinitely
     while display:
         # receive the data from server
-        data_bytes, _ = socket.recvfrom(CHUNK_SIZE)
+        data_bytes, addr = socket.recvfrom(CHUNK_SIZE)
         # decode the data
         if (decode(data_bytes) == 'FRAME START'):
             # receive the chunks of the frame
@@ -125,6 +127,8 @@ def display_screen(socket, window:str):
                 if (cv2.waitKey(0) == 27):
                     # terminate the process
                     display = False
+                    # send a message to server
+                    socket.sendto('QUIT'.encode('utf-8'), addr)
             except Exception as e:
                 # do nothing if receieved an invalid data
                 pass
