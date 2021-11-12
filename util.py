@@ -91,6 +91,7 @@ def display_screen(socket:socket.socket, window:str):
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
     cv2.setWindowProperty(window, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.resizeWindow(window, 480, 270)
+    cv2.setWindowTitle(window, window)
     # displays the screen
     display = True
     # receive data from server indefinitely
@@ -105,6 +106,8 @@ def display_screen(socket:socket.socket, window:str):
             data += socket.recv(4096 if to_read > 4096 else to_read)
         # display the image
         try:
+            cv2.setWindowProperty(window, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            cv2.setWindowTitle(window, window)
             cv2.imshow(window, parse_frame(data))
             cv2.waitKey(10)
         except Exception as e:
