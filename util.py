@@ -89,7 +89,8 @@ def share_screen(conn:socket.socket):
 def display_screen(socket:socket.socket, window:str):
     # create a named window
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    # cv2.resizeWindow(window, 480, 270)
+    cv2.setWindowProperty(window, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    cv2.resizeWindow(window, 480, 270)
     # displays the screen
     display = True
     # receive data from server indefinitely
