@@ -11,11 +11,11 @@ import atexit
 parser = argparse.ArgumentParser()
 parser.add_argument('--server', action='store_true', help='Runs the server')
 parser.add_argument('--client', action='store_true', help='Runs the client')
-parser.add_argument('--server_host', type=str, default='', help='Host for the server')
-parser.add_argument('--client_host', type=str, default='127.0.0.1', help='Host for the client')
 parser.add_argument('--server_ip', type=str, default='127.0.0.1', help='IP address of the server')
+parser.add_argument('--server_host', type=str, default='127.0.0.1', help='Host for the server')
 parser.add_argument('--server_port', type=int, default=4000, help='Port at which server is running')
 parser.add_argument('--client_port', type=int, default=4040, help='Port at which client is running')
+parser.add_argument('--client_host', type=str, default='127.0.0.1', help='Host for the client')
 parser.add_argument('--public', action='store_true', help='Allow access to your server without key')
 parser.add_argument('--title', type=str, default='screen-share', help='The title of the window')
 
